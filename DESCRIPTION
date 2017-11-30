@@ -1,0 +1,11 @@
+Package: demItaly
+Type: Package
+Title: Demographic data from Italy
+Version: 0.1.0
+Authors@R: person("Charlotte", "Taglioni", 
+    email = "charlotte.taglioni@phd.unipd.it", role = c("aut", "cre"))
+Description: Datasets for demographic analysis. Original data are 
+    public data from the Italian National Statistical Institute (ISTAT).
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
