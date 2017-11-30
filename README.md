@@ -6,5 +6,7 @@ The package is still under development.
 
 Install `demItalt` from github with:
 
+```
 library(devtools)
 install_github("ctaglioni/demItaly")
+```
