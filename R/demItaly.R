@@ -45,7 +45,7 @@
 
 "italy.popn.reg"
 
-#' Registered births in Italy by age and region, 2006-2014.
+#' Registered births in Italy by age and region, 2006-2016.
 #'
 #' The \code{"age"} variable refers to the age of the mother.
 #'
@@ -62,10 +62,7 @@
 
 "italy.births.reg"
 
-
-
-
-#' Registered deaths in Italy by age, sex, and region, 2006-2014.
+#' Registered deaths in Italy by age, sex, and region, 2006-2015.
 #'
 #' @format An array with dimensions "age", "sex", "region", and "year"
 #'
