@@ -3,7 +3,7 @@
 #----------------------
 
 library(abind)
-
+setwd("C:\\Users\\Cha\\Documents\\demItaly\\data-raw\\Population")
 # Load datasets
 # Regional data from 2002 to 2011
 popR <- read.csv("PopolazioneEta-Territorio-Regioni.csv", sep=";", header = FALSE)
@@ -95,7 +95,7 @@ dim(female_allclass)
 MF <- t(cbind(male_allclass, female_allclass))
 # Dimensions names
 dimn0611 <- list(age = c(0:99, "100+"), sex = Sex,
-                region = Regions, year = c(2006:2011))
+                region = Regions, time = c(2006:2011))
 
 Pop0611 <- array(MF, dim = c(A100idx, Sidx, Ridx, 6), dimnames = dimn0611)
 
@@ -111,7 +111,7 @@ for(i in 1:Ridx){
 dimn1217<- list(age = c(0:99, "100+"), sex = Sex, region = Regions)
 
 # Function to apply to datasets
-single.year.matrix <- function(region, province, dimn){
+single.time.matrix <- function(region, province, dimn){
   #Select data of interest
   R <- region[3:nrow(region), c(7, 12)]
   mode(R) <- "numeric"
@@ -143,12 +143,12 @@ P16 <- read.csv("province16.csv", header = FALSE)
 R17 <- as.matrix(read.csv("regioni17.csv", header = FALSE))
 P17 <- read.csv("province17.csv", header = FALSE)
 
-Pop12 <- single.year.matrix(R12, P12, dimn1217)
-Pop13 <- single.year.matrix(R13, P13, dimn1217)
-Pop14 <- single.year.matrix(R14, P14, dimn1217)
-Pop15 <- single.year.matrix(R15, P15, dimn1217)
-Pop16 <- single.year.matrix(R16, P16, dimn1217)
-Pop17 <- single.year.matrix(R17, P17, dimn1217)
+Pop12 <- single.time.matrix(R12, P12, dimn1217)
+Pop13 <- single.time.matrix(R13, P13, dimn1217)
+Pop14 <- single.time.matrix(R14, P14, dimn1217)
+Pop15 <- single.time.matrix(R15, P15, dimn1217)
+Pop16 <- single.time.matrix(R16, P16, dimn1217)
+Pop17 <- single.time.matrix(R17, P17, dimn1217)
 
 
 # Random check
@@ -162,10 +162,12 @@ for(i in 1:Ridx){
 
 # Dimensions names
 dimn1 <- list(age = c(0:99, "100+"), sex = Sex,
-             region = Regions, year = c(2006:2017))
+             region = Regions, time = c(2006:2017))
 
 italy.popn.reg.1Y <- abind(Pop0611, Pop12$Pop, Pop13$Pop, Pop14$Pop,
                            Pop15$Pop, Pop16$Pop, Pop17$Pop, along = 4)
+
+dimnames(italy.popn.reg.1Y) <- dimn1
 
 # Complete array 5year age groups
 
@@ -174,7 +176,7 @@ dimn5 <- list(age = c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29",
                      "30-34", "35-39", "40-44", "45-49", "50-54",
                      "55-59", "60-64", "65-69", "70-74", "75-79",
                      "80-84", "85-89", "90-94", "95-99", "100+"),
-             sex = Sex, region = Regions, year = c(2006:2017))
+             sex = Sex, region = Regions, time = c(2006:2017))
 
 italy.popn5Y.100 <- array(NA, dim = c(21, Sidx, Ridx, 12), dimnames = dimn5)
 
@@ -196,7 +198,7 @@ dimn5.90 <- list(age = c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29",
                         "30-34", "35-39", "40-44", "45-49", "50-54",
                         "55-59", "60-64", "65-69", "70-74", "75-79",
                         "80-84", "85-89", "90+"),
-                sex = Sex, region = Regions, year = c(2006:2017) )
+                sex = Sex, region = Regions, time = c(2006:2017) )
 
 italy.popn.reg <- array(NA, dim = c(A90idx,Sidx,Ridx,12), dimnames = dimn5.90)
 italy.popn.reg[1:18, , , ] <- italy.popn5Y.100[1:18, , , ]

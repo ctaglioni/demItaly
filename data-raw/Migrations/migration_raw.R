@@ -45,14 +45,16 @@ dimn <- list(region = c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA", "TRENTINO-ALTO
                       "BASILICATA", "CALABRIA", "SICILIA", "SARDEGNA"),
            sex = c("Male", "Female"),
            age =c("0-17", "18-39",	"40-64",	"65+"),
-           year = c(2006:2014))
+           time = c(2006:2014))
 
 R <- length(dimn$region)
 S <- length(dimn$sex)
 A <- length(dimn$age)
-Y <- length(dimn$year)
+Y <- length(dimn$time)
 
 italy.intl.imm <- array(imm, dim = c(R, S, A, Y), dimnames = dimn)
 italy.intl.emi <- array(emi, dim = c(R, S, A, Y), dimnames = dimn)
 italy.ext.imm <- array(EI, dim = c(R, S, A, Y), dimnames = dimn)
 italy.ext.emi <- array(EO, dim = c(R, S, A, Y), dimnames = dimn)
+
+

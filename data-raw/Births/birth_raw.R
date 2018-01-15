@@ -70,7 +70,7 @@ b15 <- birth.data(BpR15)
 BpR16 <- read.xlsx("BpR16.xls", sheetIndex = 1)
 b16 <- birth.data(BpR16)
 
-dimn <- list(region = Regions, age = Age, year = Years)
+dimn <- list(region = Regions, age = Age, time = Years)
 
 italy.births.reg <- abind(b06, b07 , b08, b09, b10, b11, b12,
                           b13, b14, b15, b16, along = 3)

@@ -74,7 +74,7 @@ dimn95 <- list(sex = Sex, age = Age95, region = Regions)
 dimn90 <- list(sex = Sex, age = Age, region = Regions)
 
 dimn0609 <- list(region = Regions, age = Age100,
-                 sex = Sex, year = c(2006:2009))
+                 sex = Sex, time = c(2006:2009))
 
 D0609 <- array(data0609, dim = c(22, 23, 2, 4), dimnames = dimn0609)
 
@@ -84,7 +84,7 @@ d0609b <- apply(D0609[ , 3:4, , ], c(1,3,4), sum) # From 5, 6-9 to 5-9
 d0609c <- apply(D0609[ , 21:23, , ], c(1, 3, 4), sum) # From 90-94, 95-99, 100+ to 90+
 D69 <- abind(d0609a, d0609b, D0609[ , 5:20, , ], d0609c, along = 2,
              new.names = list(region = Regions, age = Age,
-                              sex = Sex, year = c(2006:2009)))
+                              sex = Sex, time = c(2006:2009)))
 d0609ok <- aperm(D69, c(2, 3, 1, 4))
 
 # Deaths 2010-2013
@@ -92,9 +92,9 @@ d0609ok <- aperm(D69, c(2, 3, 1, 4))
 D1013 <- read.xlsx("D2010-2013.xlsx", sheetIndex = 1, startRow = 1, endRow = 25)
 D1013 <- as.matrix(D1013)
 
-#create an array of 4 dimension with rows=age classes, col=sex, year, region
+#create an array of 4 dimension with rows=age classes, col=sex, time, region
 dimn1013 <- list(age = c("0", Age) , sex = Sex,
-                 year = c(2010:2013), region = Regions)
+                 time = c(2010:2013), region = Regions)
 
 D201013 <- array(data = D1013[4:23, 2:ncol(D1013)],
                  dim = c(20, 2, 4, 22), dimnames = dimn1013)
@@ -104,7 +104,7 @@ mode(D1013t) <- "numeric"
 d1013a <- apply(D1013t[1:2, , , ], c(2, 3, 4), sum) # From "0" and "1-4" to "0-4"
 d1013b <- abind(d1013a, D1013t[3:nrow(D1013t), , , ], along = 1,
                 new.names = list(age = Age, sex = Sex,
-                                 region = Regions, year = c(2010:2013)))
+                                 region = Regions, time = c(2010:2013)))
 
 # Deaths 2014
 D14 <- read.csv("D2014.csv", header = TRUE)
@@ -147,6 +147,6 @@ d15 <- abind(D15tot[ , 1:18, ], D15_90, along = 2, new.names = dimn90)
 D15t <- aperm(d15, c(2, 1, 3)) #dimensioni come per 2015
 
 # TOTAL
-dimn <- list(age = Age, sex = Sex, region = Regions, year = c(2006:2015))
+dimn <- list(age = Age, sex = Sex, region = Regions, time = c(2006:2015))
 Dead <- abind(d0609ok, d1013b, D14t, D15t, new.names = dimn)
 italy.deaths.reg <- array(Dead, dim = c(19, 2, 22, 10), dimnames = dimn)

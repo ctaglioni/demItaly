@@ -22,17 +22,26 @@ prim1 <- prim1[ !(prim1$Territorio %in%
                       "Provincia Autonoma Trento")),-4]
 head(prim1)
 dimn<- list(year = c(2010:2014) ,
-            region= c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA", "TRENTINO-ALTO ADIGE", "BOLZANO-BOZEN",
-                      "TRENTO", "VENETO", "FRIULI-VENEZIA GIULIA", "LIGURIA", "EMILIA-ROMAGNA",
+            region= c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA", "TRENTINO-ALTO ADIGE",
+                      "VENETO", "FRIULI-VENEZIA GIULIA", "LIGURIA", "EMILIA-ROMAGNA",
+                      "TOSCANA", "UMBRIA", "MARCHE", "LAZIO", "ABRUZZO", "MOLISE", "CAMPANIA", "PUGLIA",
+                      "BASILICATA", "CALABRIA", "SICILIA", "SARDEGNA"),
+            sex= c("Total","Female"))
+
+dimn2<- list(year = c(2010:2014) ,
+            region= c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA", "TRENTINO-ALTO ADIGE",
+                      "VENETO", "FRIULI-VENEZIA GIULIA", "LIGURIA", "EMILIA-ROMAGNA",
                       "TOSCANA", "UMBRIA", "MARCHE", "LAZIO", "ABRUZZO", "MOLISE", "CAMPANIA", "PUGLIA",
                       "BASILICATA", "CALABRIA", "SICILIA", "SARDEGNA"),
             sex= c("Male","Female"))
 
 prim<- array(prim1$X0, dim = c(5, 20, 2), dimnames = dimn)
-males <- prim[ , ,"Male"]- prim[ , ,"Female"]
-prim[ , , "Male"] <- males
-prim <- aperm(prim, c(2,3,1))
-prim <- prim[c(1,2,4,5,6,7,3,8:20), , ]
+males <- prim[ , ,"Total"]- prim[ , ,"Female"]
+prim[ , , "Total"] <- males
+dimnames(prim) <- dimn2
+prim<- aperm(prim, c(2,3,1))
+prim
+<- prim[c(1,2,4,5,6,7,3,8:20), , ]
 unique(prim1$Territorio)
 save(prim, file="prim.RData")
 prim
