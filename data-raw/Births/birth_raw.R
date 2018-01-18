@@ -72,8 +72,30 @@ b16 <- birth.data(BpR16)
 
 dimn <- list(region = Regions, age = Age, time = Years)
 
-italy.births.reg <- abind(b06, b07 , b08, b09, b10, b11, b12,
+italy.births.regNA <- abind(b06, b07 , b08, b09, b10, b11, b12,
                           b13, b14, b15, b16, along = 3)
 
-which(is.na(italy.births.reg))
-dimnames(italy.births.reg)<- dimn
+dimnames(italy.births.regNA)<- dimn
+
+# Modify age groups and distribute NAs births
+
+tot.birth <- apply(italy.births.regNA[,1:9,], c(1, 3), sum)
+
+births.prop <- array(NA, dim = c(22,9,11))
+NAspread <- array(NA, dim = c(22,9,11))
+italy.births.reg <- array(NA, dim = c(22,7,11))
+
+for(i in 1:dim(italy.births.regNA)[3]){
+  births.prop[,,i] <- italy.births.regNA[,1:9,i]/tot.birth[,i]
+  NAspread[,,i] <- births.prop[,,i]*italy.births.regNA[,10,i]
+  births.new <- round(italy.births.regNA[,1:9,]+NAspread)
+  italy.births.reg[,,i] <- cbind(rowSums(births.new[,1:2,i]),
+                            births.new[,3:7,i],
+                            rowSums(births.new[,8:9,i]))
+
+}
+
+dimnames(italy.births.reg) <- list(region = Regions,
+                                   age = c("15-19", "20-24", "25-29",
+                                           "30-34", "35-39", "40-44", "45-49"),
+                                   time = Years)

@@ -6,7 +6,8 @@
 #' All births to mothers aged less than 20 (included those to mothers aged less than
 #' 15) have been included in age group \code{"15-19"}, and all births to mothers aged
 #' 45 or higher (including those to mothers aged 50+) have been included in age
-#' group \code{"45-49"}.
+#' group \code{"45-49"}. NAs have been proportionally distributed among the other
+#' age groups. These groups reflect the data structure used in \code{"demest"} package.
 #'
 #' @format An array with dimensions "region", "age" and "year"
 #'
