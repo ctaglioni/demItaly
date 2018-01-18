@@ -1,60 +1,176 @@
+### A.A.A. Problem with new data!
+
 #----------------------
-# Migrations 2006-2014
-#---------------------
+# Migration 2006-2016
+#----------------------
 
-library(xlsx)
-library(abind)
+setwd("C:\\Users\\Cha\\Documents\\demItaly\\data-raw\\Migrations")
+library(tidyverse)
 
-# Internal immigration and emigration
-immtot <- read.xlsx("imm0614.xlsx", sheetIndex = 1,
-                    startRow = 3, endRow = 139, header = FALSE)
-emitot <- read.xlsx("emi0614.xlsx", sheetIndex = 1,
-                    startRow = 3, endRow = 139, header = FALSE)
-# External immigration and emigration
-immest <- read.xlsx("imm0614est.xlsx", sheetIndex = 1,
-                  startRow = 5, endRow = 141, header = FALSE)
-emiest <- read.xlsx("emi0614est.xlsx", sheetIndex = 1,
-                  startRow = 5, endRow = 141, header = FALSE)
+imm <- read.csv("imm0616.csv")
+emi <- read.csv("emi0616.csv")
 
-# Vector of region names as in the .xlxs file
-RegOrig <- c("Piemonte", "Valle d'Aosta / Vallee d'Aoste",
-             "Lombardia", "Trentino-Alto Adige",
-             "Provincia Autonoma Bolzano",
-             "Provincia Autonoma Trento", "Veneto",
-             "Friuli-Venezia Giulia", "Liguria",
-             "Emilia-Romagna", "Toscana", "Umbria",
-             "Marche", "Lazio", "Abruzzo", "Molise",
-             "Campania", "Puglia", "Basilicata",
-             "Calabria", "Sicilia","Sardegna")
+#-------------------------
+# Internal immigration
+#-------------------------
 
-imm <- immtot[immtot$X1 %in% RegOrig, ]
-imm <- as.matrix(imm[ ,2:ncol(imm)])
+int_imm <- select(imm, -c(Territorio.di.origine, Tipo.di.indicatore.demografico, Flags)) %>% # remove useless variables
+  filter(Tipo.di.trasferimento == "in altre regioni") %>% # only over region movements
+  filter(Territorio.di.di.destinazione %in% c("Piemonte", "Valle d'Aosta / Vallée d'Aoste",
+                                              "Lombardia", "Trentino Alto Adige / Südtirol",
+                                              "Provincia Autonoma Bolzano / Bozen",
+                                              "Provincia Autonoma Trento", "Veneto",
+                                              "Friuli-Venezia Giulia", "Liguria",
+                                              "Emilia-Romagna", "Toscana", "Umbria",
+                                              "Marche", "Lazio", "Abruzzo", "Molise",
+                                              "Campania", "Puglia", "Basilicata",
+                                              "Calabria", "Sicilia","Sardegna")) %>% # only regional data
+  filter(Sesso != "totale") %>% # only male and female
+  filter(Età != "totale") %>% # age group division
+  filter(Paese.di.cittadinanza == "Totale") %>% # not considering citizenship
+  select(-c(Tipo.di.trasferimento, Paese.di.cittadinanza)) %>%
+  distinct() #remove duplicate
 
-emi <- emitot[emitot$X1 %in% RegOrig, ]
-emi <- as.matrix(emi[ ,2:ncol(emi)])
+summary(int_imm)
+head(int_imm)
 
-EI <- immest[immest$X1 %in% RegOrig, ]
-EI <- as.matrix(EI[ ,2:ncol(EI)])
+A <- length(unique(int_imm$Età))
+S <- length(unique(int_imm$Sesso))
+R <- length(unique(int_imm$Territorio.di.di.destinazione))
+Y <- length(unique(int_imm$Seleziona.periodo))
 
-EO <- emiest[emiest$X1 %in% RegOrig, ]
-EO <- as.matrix(EO[,2:ncol(EO)])
+dimn <- list(time = unique(int_imm$Seleziona.periodo),
+             region = unique(int_imm$Territorio.di.di.destinazione),
+             age = unique(int_imm$Età),
+             sex = unique(int_imm$Sesso)
+        )
 
-dimn <- list(region = c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA", "TRENTINO-ALTO ADIGE", "BOLZANO-BOZEN",
-                      "TRENTO", "VENETO", "FRIULI-VENEZIA GIULIA", "LIGURIA", "EMILIA-ROMAGNA",
-                      "TOSCANA", "UMBRIA", "MARCHE", "LAZIO", "ABRUZZO", "MOLISE", "CAMPANIA", "PUGLIA",
-                      "BASILICATA", "CALABRIA", "SICILIA", "SARDEGNA"),
-           sex = c("Male", "Female"),
-           age =c("0-17", "18-39",	"40-64",	"65+"),
-           time = c(2006:2014))
 
-R <- length(dimn$region)
-S <- length(dimn$sex)
-A <- length(dimn$age)
-Y <- length(dimn$time)
+italy.intl.imm.perm <- array(int_imm[,5], dim = c(Y, R, A, S), dimnames = dimn)
+italy.intl.imm <- aperm(italy.intl.imm.perm, c(3, 4, 2, 1))
 
-italy.intl.imm <- array(imm, dim = c(R, S, A, Y), dimnames = dimn)
-italy.intl.emi <- array(emi, dim = c(R, S, A, Y), dimnames = dimn)
-italy.ext.imm <- array(EI, dim = c(R, S, A, Y), dimnames = dimn)
-italy.ext.emi <- array(EO, dim = c(R, S, A, Y), dimnames = dimn)
+#----------------------------
+# External immigration
+#----------------------------
+
+ext_imm <- select(imm, -c(Territorio.di.origine, Tipo.di.indicatore.demografico, Flags)) %>% # remove useless variables
+  filter(Tipo.di.trasferimento == "estero") %>% # only over region movements
+  filter(Territorio.di.di.destinazione %in% c("Piemonte", "Valle d'Aosta / Vallée d'Aoste",
+                                              "Lombardia", "Trentino Alto Adige / Südtirol",
+                                              "Provincia Autonoma Bolzano / Bozen",
+                                              "Provincia Autonoma Trento", "Veneto",
+                                              "Friuli-Venezia Giulia", "Liguria",
+                                              "Emilia-Romagna", "Toscana", "Umbria",
+                                              "Marche", "Lazio", "Abruzzo", "Molise",
+                                              "Campania", "Puglia", "Basilicata",
+                                              "Calabria", "Sicilia","Sardegna")) %>% # only regional data
+  filter(Sesso != "totale") %>% # only male and female
+  filter(Età != "totale") %>% # age group division
+  filter(Paese.di.cittadinanza == "Totale") %>% # not considering citizenship
+  select(-c(Tipo.di.trasferimento, Paese.di.cittadinanza)) %>%
+  distinct() #remove duplicate
+
+summary(ext_imm)
+head(ext_imm)
+
+A <- length(unique(ext_imm$Età))
+S <- length(unique(ext_imm$Sesso))
+R <- length(unique(ext_imm$Territorio.di.di.destinazione))
+Y <- length(unique(ext_imm$Seleziona.periodo))
+
+dimn <- list(time = unique(ext_imm$Seleziona.periodo),
+             region = unique(ext_imm$Territorio.di.di.destinazione),
+             age = unique(ext_imm$Età),
+             sex = unique(ext_imm$Sesso)
+)
+
+
+italy.ext.imm.perm <- array(ext_imm[,5], dim = c(Y, R, A, S), dimnames = dimn)
+italy.ext.imm <- aperm(italy.ext.imm.perm, c(3, 4, 2, 1))
+
+
+library(devtools)
+setwd("C:\\Users\\Cha\\Documents\\demItaly\\data")
+devtools::use_data(italy.ext.imm, overwrite=T)
+
+#----------------------
+# Internal emigration
+#----------------------
+
+summary(emi)
+head(emi)
+int_emi <- select(emi, -c(Tipo.di.indicatore.demografico, Flags)) %>% # remove useless variables
+  filter(Tipo.di.trasferimento == "in altre regioni") %>% # only over region movements
+  filter(Territorio.di.origine %in% c("Piemonte", "Valle d'Aosta / Vallée d'Aoste",
+                                              "Lombardia", "Trentino Alto Adige / Südtirol",
+                                              "Provincia Autonoma Bolzano / Bozen",
+                                              "Provincia Autonoma Trento", "Veneto",
+                                              "Friuli-Venezia Giulia", "Liguria",
+                                              "Emilia-Romagna", "Toscana", "Umbria",
+                                              "Marche", "Lazio", "Abruzzo", "Molise",
+                                              "Campania", "Puglia", "Basilicata",
+                                              "Calabria", "Sicilia","Sardegna")) %>% # only regional data
+  filter(Sesso != "totale") %>% # only male and female
+  filter(Età != "totale") %>% # age group division
+  filter(Paese.di.cittadinanza == "totale") %>% # not considering citizenship
+  select(-c(Tipo.di.trasferimento, Paese.di.cittadinanza)) %>%
+  distinct() #remove duplicate
+
+summary(int_emi)
+head(int_emi)
+
+A <- length(unique(int_emi$Età))
+S <- length(unique(int_emi$Sesso))
+R <- length(unique(int_emi$Territorio.di.di.destinazione))
+Y <- length(unique(int_emi$Seleziona.periodo))
+
+dimn <- list(time = unique(int_emi$Seleziona.periodo),
+             region = unique(int_emi$Territorio.di.di.destinazione),
+             age = unique(int_emi$Età),
+             sex = unique(int_emi$Sesso)
+)
+
+
+italy.intl.emi.perm <- array(int_emi[,5], dim = c(Y, R, A, S), dimnames = dimn)
+italy.intl.emi <- aperm(italy.intl.emi.perm, c(3, 4, 2, 1))
+
+#----------------------------
+# External emigration
+#----------------------------
+
+ext_emi <- select(emi, -c(Territorio.di.origine, Tipo.di.indicatore.demografico, Flags)) %>% # remove useless variables
+  filter(Tipo.di.trasferimento == "estero") %>% # only over region movements
+  filter(Territorio.di.di.destinazione %in% c("Piemonte", "Valle d'Aosta / Vallée d'Aoste",
+                                              "Lombardia", "Trentino Alto Adige / Südtirol",
+                                              "Provincia Autonoma Bolzano / Bozen",
+                                              "Provincia Autonoma Trento", "Veneto",
+                                              "Friuli-Venezia Giulia", "Liguria",
+                                              "Emilia-Romagna", "Toscana", "Umbria",
+                                              "Marche", "Lazio", "Abruzzo", "Molise",
+                                              "Campania", "Puglia", "Basilicata",
+                                              "Calabria", "Sicilia","Sardegna")) %>% # only regional data
+  filter(Sesso != "totale") %>% # only male and female
+  filter(Età != "totale") %>% # age group division
+  filter(Paese.di.cittadinanza == "Totale") %>% # not considering citizenship
+  select(-c(Tipo.di.trasferimento, Paese.di.cittadinanza)) %>%
+  distinct() #remove duplicate
+
+summary(ext_emi)
+head(ext_emi)
+
+A <- length(unique(ext_emi$Età))
+S <- length(unique(ext_emi$Sesso))
+R <- length(unique(ext_emi$Territorio.di.di.destinazione))
+Y <- length(unique(ext_emi$Seleziona.periodo))
+
+dimn <- list(time = unique(ext_emi$Seleziona.periodo),
+             region = unique(ext_emi$Territorio.di.di.destinazione),
+             age = unique(ext_emi$Età),
+             sex = unique(ext_emi$Sesso)
+)
+
+
+italy.ext.emi.perm <- array(ext_emi[,5], dim = c(Y, R, A, S), dimnames = dimn)
+italy.ext.emi <- aperm(italy.ext.emi.perm, c(3, 4, 2, 1))
 
 
