@@ -1,212 +1,154 @@
-#----------------------
-# Population 2006-2016
-#----------------------
+#--------------------------------
+# Population 1/1/2002 - 1/1/2011
+#--------------------------------
 
 library(abind)
-setwd("C:\\Users\\Cha\\Documents\\demItaly\\data-raw\\Population")
+library(tidyverse)
+library(demest)
+
 # Load datasets
 # Regional data from 2002 to 2011
-popR <- read.csv("PopolazioneEta-Territorio-Regioni.csv", sep=";", header = FALSE)
+popR<- as.matrix(read.csv("PopolazioneEta-Territorio-Regioni.csv", sep=";", header = FALSE))
 # Province data from 2002 to 2011
-popP <- read.csv("PopolazioneEta-Territorio-Province.csv", sep=";", header = FALSE)
+popP <- as.matrix(read.csv("PopolazioneEta-Territorio-Province.csv", sep=";", header = FALSE))
 
-# Select only all citizenship from 2006 to 2011
-popP <- popP[1370:3411, ]
-# Provinces of Bolzano (BZ) and Trento (TR)
-BZ <- popP[popP$V1==21, ]
-TR <- popP[popP$V1==22, ]
+# Table has "all citizenships" counts and then "italian" or "foreigner" citizeship
+# The last row of interest is the one before "italian" citizeship counts begins
+stop <- which(popR[,1] == "Cittadinanza italiana - Anno: 2002")
 
-#
-Regions <- c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA",
-             "TRENTINO-ALTO ADIGE", "BOLZANO-BOZEN",
-             "TRENTO", "VENETO", "FRIULI-VENEZIA GIULIA",
-             "LIGURIA", "EMILIA-ROMAGNA", "TOSCANA",
-             "UMBRIA", "MARCHE", "LAZIO", "ABRUZZO",
-             "MOLISE", "CAMPANIA", "PUGLIA", "BASILICATA",
-             "CALABRIA", "SICILIA", "SARDEGNA")
+# Sex index, interested in male and female population not total
+sexInd <- which(popR[,3] %in% c("Maschi", "Femmine"))
+sexInd<- sexInd[sexInd<stop] # only index for "all citizenship" counts
 
-Sex <- c("Male","Female")
+Idx <- rbind(sexInd, sexInd + 23) # index intervals of interest
+matidx <- matrix(NA, nrow = ncol(Idx), ncol = 23) # matrix of indexes
 
-# Indexes
-Ridx <- length(Regions)
-Sidx <- length(Sex)
-A100idx <- 101
-A90idx <- 19
-
-# Select separately male and female population
-# Indexes
-idxM <- NULL
-idxF <- NULL
-for(i in 1:6){
-  idxM[i] <- (2 + 3 * (i - 1))
-  idxF[i] <- (3 * i)
+for(i in 1:ncol(Idx)){
+matidx[i,] <- Idx[1,i]:(Idx[2,i]-1)
 }
 
-# Select males and females for BZ and TR
-BZ_M <- BZ[idxM, 3:103]
-BZ_F <- BZ[idxF, 3:103]
+Ind<- as.vector(t(matidx)) # all the indexes needed
+popR1 <- popR[Ind,-1] # matrix needed minus column of region codes
 
-TR_M <- BZ[idxM, 3:103]
-TR_F <- BZ[idxF, 3:103]
+Regions <- unique(popR[,2])[ - c(1, which(unique(popR[,2])%in% c("Regione", "Totale")))] # Regions list, first element is an empty case
+Ages <- 0:100 # Ages list
+Sex <- c("Male", "Female") # Sexes list
+Years <- 2002:2011 # Years list
 
-# Take all citizenships population for each year
-# Male and female separately
-M06 <- popR[1023:1042, 3:103]
-F06 <- popR[1046:1065, 3:103]
-M07 <- popR[1094:1113, 3:103]
-F07 <- popR[1117:1136, 3:103]
-M08 <- popR[1165:1184, 3:103]
-F08 <- popR[1188:1207, 3:103]
-M09 <- popR[1236:1255, 3:103]
-F09 <- popR[1259:1278, 3:103]
-M10 <- popR[1307:1326, 3:103]
-F10 <- popR[1330:1349, 3:103]
-M11 <- popR[1378:1397, 3:103]
-F11 <- popR[1401:1420, 3:103]
+# Length of each dimension
+Nreg <- length(Regions)
 
-# Add BZ and TR to regions
-# Male population
-M06 <- rbind(M06[1:4, ], BZ_M[1, ], TR_M[1, ], M06[5:nrow(M06), ])
-M07 <- rbind(M07[1:4, ], BZ_M[2, ], TR_M[2, ], M07[5:nrow(M07), ])
-M08 <- rbind(M08[1:4, ], BZ_M[3, ], TR_M[3, ], M08[5:nrow(M08), ])
-M09 <- rbind(M09[1:4, ], BZ_M[4, ], TR_M[4, ], M09[5:nrow(M09), ])
-M10 <- rbind(M10[1:4, ], BZ_M[5, ], TR_M[5, ], M10[5:nrow(M10), ])
-M11 <- rbind(M11[1:4, ], BZ_M[6, ], TR_M[6, ], M11[5:nrow(M11), ])
+Nsex <- length(Sex)
+Nage <- length(Ages)
+Nyear <- length(Years)
+popR2<- popR1[popR1[,1] %in% Regions,-1] # Only counts without region column (1)
 
-# Single year age groups matrix
-male_allclass <- as.matrix(rbind(M06, M07, M08, M09, M10, M11))
-mode(male_allclass) <- "numeric"
-dim(male_allclass) # Check dimension: matrix (22regions*6years=)132rows x 101 age classes columns
+# Creation of the array
+PopArray1 <- array(as.numeric(popR2), dim = c(Nreg, Nsex, Nyear, Nage),
+                   dimnames = list(region = Regions,
+                                   sex = Sex,
+                                   time = Years,
+                                   age = Ages))
 
-# Female population
-F06 <- rbind(F06[1:4, ], BZ_F[1, ], TR_F[1, ], F06[5:nrow(F06), ])
-F07 <- rbind(F07[1:4, ], BZ_F[2, ], TR_F[2, ], F07[5:nrow(F07), ])
-F08 <- rbind(F08[1:4, ], BZ_F[3, ], TR_F[3, ], F08[5:nrow(F08), ])
-F09 <- rbind(F09[1:4, ], BZ_F[4, ], TR_F[4, ], F09[5:nrow(F09), ])
-F10 <- rbind(F10[1:4, ], BZ_F[5, ], TR_F[5, ], F10[5:nrow(F10), ])
-F11 <- rbind(F11[1:4, ], BZ_F[6, ], TR_F[6, ], F11[5:nrow(F11), ])
+# Add provinces of Trento and Bolzano
+stopP <- which(popP[,1] == "Cittadinanza italiana - Anno: 2002") #Last row of interest
 
-# Single year age groups matrix
-female_allclass <- as.matrix(rbind(F06, F07, F08, F09, F10, F11))
-mode(female_allclass) <- "numeric"
-dim(female_allclass)
+# Indexes for Provinces of interest
+idx1 <- which(popP[1:stopP,2] %in% c("Bolzano/Bozen","Trento"))
+# Indexes corresponding to Total, i.e. to exclude to keep only male and female
+idxTot <- c(seq(1,(length(idx1)-5), by=6),seq(2,(length(idx1)-4), by=6))
+IndP <- idx1[-idxTot] # Removing rows number corresponding to Total
 
-# Create array for 2006-2011
-MF <- t(cbind(male_allclass, female_allclass))
-# Dimensions names
-dimn0611 <- list(age = c(0:99, "100+"), sex = Sex,
-                region = Regions, time = c(2006:2011))
+TrBz<- popP[IndP, -c(1:2)] # Selecting only rows of interest
 
-Pop0611 <- array(MF, dim = c(A100idx, Sidx, Ridx, 6), dimnames = dimn0611)
+# Creating array for Bolzano and Trento
+TrBzArray<- array(as.numeric(TrBz), dim = c(2, Nsex, Nyear, Nage),
+                   dimnames = list(region = c("Bolzano/Bozen","Trento"),
+                                   sex = Sex,
+                                   time = Years,
+                                   age = Ages))
 
-# Random checkings
-for(i in 1:Ridx){
-  # Expect "integer(0)" for all i
-  print(which(Pop0611[, 1, i, 3] != M08[i, ]))
-}
+Pop1 <- abind(PopArray1, TrBzArray, along = 1) # Unifying arrays
+Pop2 <- aperm(Pop1, c(4,2,1,3)) # Changing dimension order for demest
 
-# From 2012 to 2017
+# Put Bolzano and Trento below region of Trentino Alto-Adige and Female before Males
+Pop3 <- Pop2
+Pop3 <- Pop2[,c(2,1),c(1:4,21,22,5:20),]
+dimnames(Pop3)[[3]][5:22] <- dimnames(Pop2)[[3]][c(21,22,5:20)]
+dimnames(Pop3)[[2]] <- dimnames(Pop2)[[2]][c(2,1)]
 
-# Single year dimensions names
-dimn1217<- list(age = c(0:99, "100+"), sex = Sex, region = Regions)
+#--------------------------------
+# Population 1/1/2012 - 1/1/2017
+#--------------------------------
 
-# Function to apply to datasets
-single.time.matrix <- function(region, province, dimn){
-  #Select data of interest
-  R <- region[3:nrow(region), c(7, 12)]
-  mode(R) <- "numeric"
-  # Provinces
-  BZ <- as.matrix(province[province$V1=="021", c(8, 13)])
-  TR <- as.matrix(province[P12$V1=="022", c(8, 13)])
-  mode(BZ) <- "numeric"
-  mode(TR) <- "numeric"
-  # Complete matrices
-  MM <- matrix(c(R[1:404, 1], BZ[ ,1], TR[ ,1], R[405:nrow(R), 1]), Ridx, byrow = TRUE)
-  FF<- matrix(c(R[1:404, 2], BZ[ ,2], TR[ ,2], R[405:nrow(R), 2]), Ridx, byrow = TRUE)
-  MF <- t(cbind(MM, FF))
-  # Array
-  Pop <- array(MF, dim = c(A100idx, Sidx, Ridx), dimnames = dimn)
-  return(list(Pop = Pop, Males = MM, Females = FF))
+# Function
+transform.data <- function(R,P){
+  R <- R %>%
+    select(c(V1, V7, V12)) %>%
+    slice(-c(1,2))
+
+  first<- unique(R$V1)[1:4]
+  P <- P %>%
+    select(c(V2, V8, V13)) %>%
+    filter(V2 %in% c("Bolzano/Bozen", "Trento"))
+  Pop <- rbind(as.matrix(R[R$V1 %in% first,]),
+                 as.matrix(P),
+                 as.matrix(R[!R$V1 %in% first,]))
+  dim(Pop)
+  PopArr <- array(NA, dim = c(Nage, Nsex, length(unique(Pop[,1]))))
+  for(i in seq(length(unique(Pop[,1])))){
+    PopArr[,,i] <- abind(Pop[(1+(i-1)*101):(i*101),2:3])
+  }
+  mode(PopArr) <- "numeric"
+  PopArr <- PopArr[,c(2,1),]
+  return(PopArr)
+
 }
 
 # Load data
-R12 <- as.matrix(read.csv("regioni12.csv", header = FALSE))
+
+R12<- read.csv("regioni12.csv", header = FALSE)
 P12 <- read.csv("province12.csv", header = FALSE)
-R13 <- as.matrix(read.csv("regioni13.csv", header = FALSE))
+R13 <- read.csv("regioni13.csv", header = FALSE)
 P13 <- read.csv("province13.csv", header = FALSE)
-R14 <- as.matrix(read.csv("regioni14.csv", header = FALSE))
+R14 <- read.csv("regioni14.csv", header = FALSE)
 P14 <- read.csv("province14.csv", header = FALSE)
-R15 <- as.matrix(read.csv("regioni15.csv", header = FALSE))
+R15 <- read.csv("regioni15.csv", header = FALSE)
 P15 <- read.csv("province15.csv", header = FALSE)
-R16 <- as.matrix(read.csv("regioni16.csv", header = FALSE))
+R16 <- read.csv("regioni16.csv", header = FALSE)
 P16 <- read.csv("province16.csv", header = FALSE)
-R17 <- as.matrix(read.csv("regioni17.csv", header = FALSE))
+R17 <- read.csv("regioni17.csv", header = FALSE)
 P17 <- read.csv("province17.csv", header = FALSE)
 
-Pop12 <- single.time.matrix(R12, P12, dimn1217)
-Pop13 <- single.time.matrix(R13, P13, dimn1217)
-Pop14 <- single.time.matrix(R14, P14, dimn1217)
-Pop15 <- single.time.matrix(R15, P15, dimn1217)
-Pop16 <- single.time.matrix(R16, P16, dimn1217)
-Pop17 <- single.time.matrix(R17, P17, dimn1217)
+Pop12 <- transform.data(R12,P12)
+Pop13 <- transform.data(R13, P13)
+Pop14 <- transform.data(R14, P14)
+Pop15 <- transform.data(R15, P15)
+Pop16 <- transform.data(R16, P16)
+Pop17 <- transform.data(R17, P17)
 
+Pop0217 <- abind(Pop3, Pop12, Pop13, Pop14, Pop15, Pop16, Pop17, along = 4)
+dimnames(Pop0217) <- list(age = Ages,
+                          sex = Sex[c(2,1)],
+                          region = dimnames(Pop3)[[3]],
+                          time = 2002:2017)
 
-# Random check
-for(i in 1:Ridx){
-  # Expecting "integer(0)" for all i
-  print(which(Pop12$Pop[ , 2, i]!=Pop12$Females[i, ]))
-}
+italy.popn.reg.1Y <- Pop0217
 
+# Create 5 years age groups + group "100+"
+Age5y<- Counts(italy.popn.reg.1Y[-101,,,], dimscales = c(time="Points"))%>%
+  collapseIntervals(dimension = "age", width = 5)
+italy.popn5Y.100 <- abind(as.array(Age5y), italy.popn.reg.1Y[101,,,], along= 1)
+dimnames(italy.popn5Y.100)[[1]][21] <- "100+"
+dimnames(italy.popn5Y.100) <- list(age = c(dimnames(Age5y)$age, "100+"),
+                                   sex = Sex[c(2,1)],
+                                   region = dimnames(Pop3)[[3]],
+                                   time = 2002:2017)
 
-# Complete array single year age groups
-
-# Dimensions names
-dimn1 <- list(age = c(0:99, "100+"), sex = Sex,
-             region = Regions, time = c(2006:2017))
-
-italy.popn.reg.1Y <- abind(Pop0611, Pop12$Pop, Pop13$Pop, Pop14$Pop,
-                           Pop15$Pop, Pop16$Pop, Pop17$Pop, along = 4)
-
-dimnames(italy.popn.reg.1Y) <- dimn1
-
-# Complete array 5year age groups
-
-# Dimensions names
-dimn5 <- list(age = c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29",
-                     "30-34", "35-39", "40-44", "45-49", "50-54",
-                     "55-59", "60-64", "65-69", "70-74", "75-79",
-                     "80-84", "85-89", "90-94", "95-99", "100+"),
-             sex = Sex, region = Regions, time = c(2006:2017))
-
-italy.popn5Y.100 <- array(NA, dim = c(21, Sidx, Ridx, 12), dimnames = dimn5)
-
-for(t in 1:12){
-  for(r in 1:Ridx){
-    for(s in 1:Sidx){
-      for(i in 1:20){
-        italy.popn5Y.100[i, s, r, t] <- sum(italy.popn.reg.1Y[(((i - 1) * 5 + 1):(5 * i)), s, r, t])
-      }
-      italy.popn5Y.100[21, s, r, t] <- italy.popn.reg.1Y[A100idx, s, r, t]
-    }
-  }
-}
-
-# Complete array 5year age groups, last age group "90+"
-
-# Dimensions names
-dimn5.90 <- list(age = c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29",
-                        "30-34", "35-39", "40-44", "45-49", "50-54",
-                        "55-59", "60-64", "65-69", "70-74", "75-79",
-                        "80-84", "85-89", "90+"),
-                sex = Sex, region = Regions, time = c(2006:2017) )
-
-italy.popn.reg <- array(NA, dim = c(A90idx,Sidx,Ridx,12), dimnames = dimn5.90)
-italy.popn.reg[1:18, , , ] <- italy.popn5Y.100[1:18, , , ]
-
-for(t in 1:12){
-  for(r in 1:Ridx){
-    for(s in 1:Sidx){
-      italy.popn.reg[A90idx, s, r, t]<-sum(italy.popn.reg.1Y[A90idx:21, s, r, t])
-    }
-  }
-}
+# Create age group 90+
+Age90 <- apply(italy.popn5Y.100[19:21,,,], c(2,3,4), sum)
+italy.popn.reg<-abind(italy.popn5Y.100[1:18,,,], Age90, along = 1)
+dimnames(italy.popn.reg) <- list(age = c(dimnames(Age5y)$age[1:18], "90+"),
+                                 sex = Sex[c(2,1)],
+                                 region = dimnames(Pop3)[[3]],
+                                 time = 2002:2017)
