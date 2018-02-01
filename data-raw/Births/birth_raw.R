@@ -4,7 +4,7 @@
 
 library(xlsx)
 library(abind)
-
+library(demItaly)
 # Age groups
 Age <- c("<18", "18-19", "20-24", "25-29",
          "30-34", "35-39", "40-44", "45-49",
@@ -12,15 +12,10 @@ Age <- c("<18", "18-19", "20-24", "25-29",
 Aidx <- length(Age)
 
 # Regions
-Regions <- c("PIEMONTE", "VALLE D'AOSTA", "LOMBARDIA",
-             "TRENTINO-ALTO ADIGE", "BOLZANO-BOZEN",
-             "TRENTO", "VENETO", "FRIULI-VENEZIA GIULIA",
-             "LIGURIA", "EMILIA-ROMAGNA", "TOSCANA",
-             "UMBRIA", "MARCHE", "LAZIO", "ABRUZZO",
-             "MOLISE", "CAMPANIA", "PUGLIA", "BASILICATA",
-             "CALABRIA", "SICILIA", "SARDEGNA")
+load("~/demItaly/data/italy.popn.reg.rda")
+Regions <- dimnames(italy.popn.reg)[[3]]
 Ridx <- length(Regions)
-
+setwd("~/demItaly/data-raw/Births")
 # Years
 Years <- c(2006:2016)
 t <- length(Years)
