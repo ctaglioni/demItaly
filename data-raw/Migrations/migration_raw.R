@@ -324,5 +324,3 @@ plot(netmigr3)
 # Differences between consistent data and non consistent
 sum(italy.int.out.cons-italy.int.out)
 sum(netmigr)
-
-devtools::use_data(italy.int.out.cons, overwrite = TRUE)
