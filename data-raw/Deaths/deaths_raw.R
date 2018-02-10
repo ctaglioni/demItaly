@@ -3,6 +3,7 @@
 #----------------------
 
 library(xlsx)
+library(tidyverse)
 library(abind)
 library(demItaly)
 
@@ -93,16 +94,14 @@ dimnames(d1013b) <- list(age = Age,
 # Deaths 2014
 #-------------
 
-D14 <- read.csv("D2014.csv", header = TRUE)
+D14<- read.csv("D2014.csv", header = TRUE)
 
 vars <- colnames(D14)
-Regions <- unique(D14$Denominazione.territoriale)[9:30]
-
 
 # Subarray of interest
 D14sub <- D14 %>%
-  select(vars[-c(1:3)]) %>% # remove variables not of interes
-  filter(Denominazione.territoriale %in% Regions) %>% # select only regions of interest
+  filter(Entita..territoriale == "Regione") %>% # select only regions of interest
+  select(vars[-c(1:3)]) %>% # remove variables not of interest
   filter(Sesso != "Totale") %>% # only M and F
   filter(Classi.di.eta != "Totale") %>% # only age groups not total
   distinct() # remove duplicates (i.e. Valle d'Aosta twice)
@@ -126,14 +125,13 @@ dimnames(D14ok) <- list(age = Age,
 #--------------------------------------
 D15 <- read.csv("D2015.csv", header = TRUE)
 
-vars <- colnames(D15)
-Regions <- unique(D15$Denominazione.territoriale)[9:30]
+vars<- colnames(D15)
 
 
 # Subarray of interest
 D15sub <- D15 %>%
-  select(vars[-c(1:3,8)]) %>% # remove variables not of interes
-  filter(Denominazione.territoriale %in% Regions) %>% # select only regions of interest
+  filter(Entita.territoriale == "Regione") %>% # select only regions of interest
+  select(vars[-c(1:3, 8)]) %>% # remove variables not of interest
   filter(Sesso != "Maschi e femmine") %>% # only M and F
   filter(Classi.di.eta != "Totale") %>% # only age groups not total
   distinct() # remove duplicates (i.e. Valle d'Aosta twice)
@@ -162,4 +160,3 @@ dimnames(Dead) <- list(age = Age,
                        time = c(2006:2015))
 
 italy.deaths.reg <- Dead
-
