@@ -1,7 +1,7 @@
 library(demest)
 library(tidyverse)
 library(abind)
-setwd("C:\\Users\\Cha\\Documents\\demItaly\\data-raw\\BilancioDemografico")
+
 r16<- read.csv("regioni_bd2016.csv", header=TRUE) %>%
   column_to_rownames("Regione")
 
