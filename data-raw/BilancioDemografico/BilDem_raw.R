@@ -112,28 +112,62 @@ ei12p <- select(p12,Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmin
 eo12 <- select(r12,Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
 eo12p <- select(p12,Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
 
-# 2011
+# 2011 post census
 
-r11<- read.csv("regioni_bd2011.csv", header=TRUE) %>%
+r11post<- read.csv("regioni_bd_cens.csv", header=TRUE) %>%
   column_to_rownames("Regione")
 
-p11<- read.csv("province_bd2011.csv", header=TRUE) %>%
+p11post<- read.csv("province_bd_cens.csv", header=TRUE) %>%
   filter(Provincia %in% c("Bolzano/Bozen", "Trento"))
 
-n11 <- select(r11, Popolazione.al.1Â..Gennaio...Maschi, Popolazione.al.1Â..Gennaio...Femmine)
-n11p <- select(p11, Popolazione.al.1Â..Gennaio...Maschi, Popolazione.al.1Â..Gennaio...Femmine)
+b11post <- select(r11post, Nati...Maschi, Nati...Femmine)
+b11ppost <- select(p11post, Nati...Maschi, Nati...Femmine)
 
-b11 <- select(r11, Nati...Maschi, Nati...Femmine)
-b11p <- select(p11, Nati...Maschi, Nati...Femmine)
+d11post <- select(r11post, Morti...Maschi, Morti...Femmine)
+d11ppost <- select(p11post, Morti...Maschi, Morti...Femmine)
 
-d11 <- select(r11, Morti...Maschi, Morti...Femmine)
-d11p <- select(p11, Morti...Maschi, Morti...Femmine)
+ei11post <- select(r11post, Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmine)
+ei11ppost <- select(p11post, Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmine)
 
-ei11 <- select(r11,Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmine)
-ei11p <- select(p11,Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmine)
+eo11post <- select(r11post, Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
+eo11ppost <- select(p11post, Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
 
-eo11 <- select(r11,Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
-eo11p <- select(p11,Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
+
+# 2011 pre-census
+r11pre<- read.csv("regioni_bd2011.csv", header=TRUE) %>%
+  column_to_rownames("Regione")
+
+p11pre<- read.csv("province_bd2011.csv", header=TRUE) %>%
+  filter(Provincia %in% c("Bolzano/Bozen", "Trento"))
+
+n11 <- select(r11pre, Popolazione.al.1Â..Gennaio...Maschi, Popolazione.al.1Â..Gennaio...Femmine)
+n11p <- select(p11pre, Popolazione.al.1Â..Gennaio...Maschi, Popolazione.al.1Â..Gennaio...Femmine)
+
+b11pre <- select(r11pre, Nati...Maschi, Nati...Femmine)
+b11ppre <- select(p11pre, Nati...Maschi, Nati...Femmine)
+
+d11pre <- select(r11pre, Morti...Maschi, Morti...Femmine)
+d11ppre <- select(p11pre, Morti...Maschi, Morti...Femmine)
+
+ei11pre <- select(r11pre, Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmine)
+ei11ppre <- select(p11pre, Iscritti.dall.estero...Maschi, Iscritti.dall.estero...Femmine)
+
+eo11pre <- select(r11pre, Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
+eo11ppre <- select(p11pre, Cancellati.per.l.estero...Maschi, Cancellati.per.l.estero...Femmine)
+
+# Total births, deaths migration 2011
+
+b11 <- b11pre + b11post
+b11p <- b11ppre + b11ppost
+
+d11 <- d11pre + d11post
+d11p <- d11ppre + d11ppost
+
+ei11 <- ei11pre + ei11post
+ei11p <- ei11ppre + ei11ppost
+
+eo11 <- eo11pre + eo11post
+eo11p <- eo11ppre + eo11ppost
 
 # 2010
 
