@@ -310,7 +310,8 @@ italy.popn.bd <- array(c(rbind(data.matrix(n06),data.matrix(n06p)),
                          rbind(data.matrix(n16),data.matrix(n16p)))
                          , dim = c(22, 2, 11))
 
-italy.popn.bd <- italy.popn.bd[c(1,2,4,5,21,22,6:7,3,8:20),c(2,1),]
+italy.popn.bd <- italy.popn.bd[c(1,2,4,5,21,22,6,7,3,8,10,11,9,12,14,15,13,16,17,18,19,20),
+                               c(2,1),]
 dimnames(italy.popn.bd) <- list(region = Regions,
                                  sex = Sex,
                                  time = Years)
@@ -330,7 +331,8 @@ italy.births.bd <- array(c(rbind(data.matrix(b06),data.matrix(b06p)),
                          rbind(data.matrix(b16),data.matrix(b16p)))
                        , dim = c(22, 2, 11))
 
-italy.births.bd <- italy.births.bd[c(1,2,4,5,21,22,6:7,3,8:20),c(2,1),]
+italy.births.bd <- italy.births.bd[c(1,2,4,5,21,22,6,7,3,8,10,11,9,12,14,15,13,16,17,18,19,20),
+                                   c(2,1),]
 dimnames(italy.births.bd) <- list(region = Regions,
                                 sex = Sex,
                                 time = Years)
@@ -349,7 +351,8 @@ italy.deaths.bd <- array(c(rbind(data.matrix(d06),data.matrix(d06p)),
                            rbind(data.matrix(d15),data.matrix(d15p)),
                            rbind(data.matrix(d16),data.matrix(d16p)))
                          , dim = c(22, 2, 11))
-italy.deaths.bd <- italy.deaths.bd[c(1,2,4,5,21,22,6:7,3,8:20),c(2,1),]
+italy.deaths.bd <- italy.deaths.bd[c(1,2,4,5,21,22,6,7,3,8,10,11,9,12,14,15,13,16,17,18,19,20),
+                                   c(2,1),]
 dimnames(italy.deaths.bd) <- list(region = Regions,
                                   sex = Sex,
                                   time = Years)
@@ -367,7 +370,8 @@ italy.ext.in.bd <- array(c(rbind(data.matrix(ei06),data.matrix(ei06p)),
                            rbind(data.matrix(ei16),data.matrix(ei16p)))
                          , dim = c(22, 2, 11))
 
-italy.ext.in.bd <- italy.ext.in.bd[c(1,2,4,5,21,22,6:7,3,8:20),c(2,1),]
+italy.ext.in.bd <- italy.ext.in.bd[c(1,2,4,5,21,22,6,7,3,8,10,11,9,12,14,15,13,16,17,18,19,20),
+                                   c(2,1),]
 dimnames(italy.ext.in.bd) <- list(region = Regions,
                                   sex = Sex,
                                   time = Years)
@@ -384,7 +388,9 @@ italy.ext.out.bd <- array(c(rbind(data.matrix(eo06),data.matrix(eo06p)),
                             rbind(data.matrix(eo15),data.matrix(eo15p)),
                             rbind(data.matrix(eo16),data.matrix(eo16p)))
                           , dim = c(22, 2, 11))
-italy.ext.out.bd <- italy.ext.out.bd[c(1,2,4,5,21,22,6:7,3,8:20),c(2,1),]
+italy.ext.out.bd <- italy.ext.out.bd[c(1,2,4,5,21,22,6,7,3,8,10,11,9,12,14,15,13,16,17,18,19,20),
+                                     c(2,1),]
 dimnames(italy.ext.out.bd) <- list(region = Regions,
                                   sex = Sex,
                                   time = Years)
+
