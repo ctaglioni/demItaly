@@ -4,7 +4,7 @@
 library(xlsx)
 library(abind)
 library(tidyverse)
-setwd("~\\demItaly\\data-raw\\Migrations")
+library(demest)
 
 #----------------------
 # Immigration 2006-2016
@@ -324,3 +324,173 @@ plot(netmigr3)
 # Differences between consistent data and non consistent
 sum(italy.int.out.cons-italy.int.out)
 sum(netmigr)
+
+#-----------------------------------------
+#---          EUROSTAT DATA           ---#
+#-----------------------------------------
+setwd("C:\\Users\\Cha\\Documents\\demItaly\\data-raw\\Migrations")
+library(tidyverse)
+library(abind)
+
+imm.EU <- read.csv("migr_imm8_1_Data.csv") %>%
+  select(-c(GEO, AGEDEF, UNIT, Flag.and.Footnotes)) %>%
+  filter(SEX != "Total") %>%
+  filter(AGE != "Total") %>%
+  filter(AGE != "Unknown") %>%
+  spread(TIME,Value)
+
+emi.EU <- read.csv("migr_emi2_1_Data.csv")%>%
+  select(-c(GEO, AGEDEF, UNIT, Flag.and.Footnotes))%>%
+  filter(SEX != "Total") %>%
+  filter(AGE != "Total") %>%
+  filter(AGE != "Unknown") %>%
+  spread(TIME,Value)
+
+
+imm.EU.arr <- abind(imm.EU[,c(1,2,3)],
+      imm.EU[,c(1,2,4)],
+      imm.EU[,c(1,2,5)],
+      imm.EU[,c(1,2,6)],
+      imm.EU[,c(1,2,7)],
+      imm.EU[,c(1,2,8)],
+      imm.EU[,c(1,2,9)],
+      imm.EU[,c(1,2,10)],
+      imm.EU[,c(1,2,11)],
+      imm.EU[,c(1,2,12)],
+      imm.EU[,c(1,2,13)],along = 3)
+
+a1 <- as.data.frame(imm.EU.arr[,,1]) %>%
+  spread(SEX, "2016")
+a2 <- as.data.frame(imm.EU.arr[,,2]) %>%
+  spread(SEX, "2016")
+a3 <- as.data.frame(imm.EU.arr[,,3]) %>%
+  spread(SEX, "2016")
+a4 <- as.data.frame(imm.EU.arr[,,4]) %>%
+  spread(SEX, "2016")
+a5 <- as.data.frame(imm.EU.arr[,,5]) %>%
+  spread(SEX, "2016")
+a6 <- as.data.frame(imm.EU.arr[,,6]) %>%
+  spread(SEX, "2016")
+a7 <- as.data.frame(imm.EU.arr[,,7]) %>%
+  spread(SEX, "2016")
+a8 <- as.data.frame(imm.EU.arr[,,8]) %>%
+  spread(SEX, "2016")
+a9 <- as.data.frame(imm.EU.arr[,,9]) %>%
+  spread(SEX, "2016")
+a10 <- as.data.frame(imm.EU.arr[,,10]) %>%
+  spread(SEX, "2016")
+a11 <- as.data.frame(imm.EU.arr[,,11]) %>%
+  spread(SEX, "2016")
+
+wds <- c("year", "years")
+
+myTransData <- function(a11,wds){
+  library(tm)
+a11$AGE <- removeWords(as.character(a11$AGE),wds)
+a11$AGE <- ifelse(a11$AGE == "Less than 1 ", 0,
+       ifelse(a11$AGE == "100  or over", 100,a11$AGE))
+a11$AGE <- gsub(" ", "", a11$AGE)
+a11$AGE <- as.numeric(a11$AGE)
+a11 <- a11[order(a11$AGE),]
+a112 <- a11[,-1]
+rownames(a112)<- a11$AGE
+a112$Females <- gsub(",", "", a112$Females)
+a112$Males <- gsub(",", "", a112$Males)
+a113 <- cbind(as.numeric(unlist(a112[[1]])), as.numeric(unlist(a112[[2]])))
+return(a113)
+}
+
+a1 <- myTransData(a1, wds)
+a2 <- myTransData(a2, wds)
+a3 <- myTransData(a3, wds)
+a4 <- myTransData(a4, wds)
+a5 <- myTransData(a5, wds)
+a6 <- myTransData(a6, wds)
+a7 <- myTransData(a7, wds)
+a8 <- myTransData(a8, wds)
+a9 <- myTransData(a9, wds)
+a10 <- myTransData(a10, wds)
+a11 <- myTransData(a11, wds)
+imm.final <- abind(a1,
+                   a2,a3,a4,a5,a6,a7,a8,a9,a10,a11, along = 3)
+dimnames(imm.final) <- list(age = 0:100,
+                            sex = c("Female", "Male"),
+                            time = 2006:2016)
+mode(imm.final)
+imm.final[,,1]
+
+#---------------
+# Emigration
+#---------------
+
+emi.EU.arr <- abind(emi.EU[,c(1,2,3)],
+                    emi.EU[,c(1,2,4)],
+                    emi.EU[,c(1,2,5)],
+                    emi.EU[,c(1,2,6)],
+                    emi.EU[,c(1,2,7)],
+                    emi.EU[,c(1,2,8)],
+                    emi.EU[,c(1,2,9)],
+                    emi.EU[,c(1,2,10)],
+                    emi.EU[,c(1,2,11)],
+                    emi.EU[,c(1,2,12)],
+                    emi.EU[,c(1,2,13)],along = 3)
+
+b1 <- as.data.frame(emi.EU.arr[,,1]) %>%
+  spread(SEX, "2016")
+b2 <- as.data.frame(emi.EU.arr[,,2]) %>%
+  spread(SEX, "2016")
+b3 <- as.data.frame(emi.EU.arr[,,3]) %>%
+  spread(SEX, "2016")
+b4 <- as.data.frame(emi.EU.arr[,,4]) %>%
+  spread(SEX, "2016")
+b5 <- as.data.frame(emi.EU.arr[,,5]) %>%
+  spread(SEX, "2016")
+b6 <- as.data.frame(emi.EU.arr[,,6]) %>%
+  spread(SEX, "2016")
+b7 <- as.data.frame(emi.EU.arr[,,7]) %>%
+  spread(SEX, "2016")
+b8 <- as.data.frame(emi.EU.arr[,,8]) %>%
+  spread(SEX, "2016")
+b9 <- as.data.frame(emi.EU.arr[,,9]) %>%
+  spread(SEX, "2016")
+b10 <- as.data.frame(emi.EU.arr[,,10]) %>%
+  spread(SEX, "2016")
+b11 <- as.data.frame(emi.EU.arr[,,11]) %>%
+  spread(SEX, "2016")
+
+wds <- c("year", "years")
+
+b1 <- myTransData(b1, wds)
+b2 <- myTransData(b2, wds)
+b3 <- myTransData(b3, wds)
+b4 <- myTransData(b4, wds)
+b5 <- myTransData(b5, wds)
+b6 <- myTransData(b6, wds)
+b7 <- myTransData(b7, wds)
+b8 <- myTransData(b8, wds)
+b9 <- myTransData(b9, wds)
+b10 <- myTransData(b10, wds)
+b11 <- myTransData(b11, wds)
+emi.final <- abind(b1,
+                   b2,b3,b4,b5,b6,b7,b8,b9,b10,b11, along = 3)
+dimnames(emi.final) <- list(age = 0:100,
+                            sex = c("Female", "Male"),
+                            time = 2006:2016)
+italy.ext.imm.EU1<- imm.final
+italy.ext.emi.EU1 <- emi.final
+
+italy.ext.emi.EU5 <- Counts(italy.ext.emi.EU1[-101,,], dimscales = c(time="Intervals"))%>%
+  collapseIntervals(dimension = "age", width = 5)
+dimnames(italy.ext.emi.EU5)
+italy.ext.emi <- abind(as.array(italy.ext.emi.EU5), italy.ext.emi.EU1[101,,], along=1)
+dimnames(italy.ext.emi)<- list( age = c(dimnames(italy.ext.emi.EU5)$age, "100+"),
+                                sex = dimnames(italy.ext.emi.EU5)$sex,
+                                time = dimnames(italy.ext.emi.EU5)$time)
+
+italy.ext.imm.EU5 <- Counts(italy.ext.imm.EU1[-101,,], dimscales = c(time="Intervals"))%>%
+  collapseIntervals(dimension = "age", width = 5)
+dimnames(italy.ext.imm.EU5)
+italy.ext.imm <- abind(as.array(italy.ext.imm.EU5), italy.ext.imm.EU1[101,,], along=1)
+dimnames(italy.ext.imm)<- list( age = c(dimnames(italy.ext.imm.EU5)$age, "100+"),
+                                sex = dimnames(italy.ext.imm.EU5)$sex,
+                                time = dimnames(italy.ext.imm.EU5)$time)
