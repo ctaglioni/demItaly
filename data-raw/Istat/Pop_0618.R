@@ -43,7 +43,7 @@ for(a in 1:length(unique(age)) ){
   }
 }
 }
-
+library(demItaly)
 dimnames(pop0211.arr)[[3]]
 dimnames(italy.births.reg)[[1]]
 pop0211.arr1 <- pop0211.arr[,,c(1,2,4,5,6,7,8,9,3,10:22),]
@@ -51,7 +51,7 @@ dimnames(pop0211.arr1)[[3]] <- dimnames(italy.births.reg)[[1]]
 dimnames(pop0211.arr1)[[2]] <- dimnames(italy.popn.reg)[[2]]
 
 pop0211ok <- as.array(Counts(pop0211.arr1[,,,], dimscales = c(time="Points", age ="Intervals"))%>%
-  collapseIntervals("age", breaks=c(seq(0,100,by=5))))
+  collapseIntervals("age", breaks=c(seq(0,90,by=5))))
 
 ###--------------------------------------
 
@@ -103,11 +103,11 @@ dimnames(pop1218.arr1)[[3]] <- dimnames(italy.popn.reg)[[3]]
 dimnames(pop1218.arr1)[[2]] <- dimnames(italy.popn.reg)[[2]]
 
 pop1218ok <- as.array(Counts(pop1218.arr1[,,,], dimscales = c(time="Points", age ="Intervals"))%>%
-                        collapseIntervals("age", breaks=c(seq(0,100,by=5))))
+                        collapseIntervals("age", breaks=c(seq(0,90,by=5))))
 
 library(abind)
 pop0618 <-abind(pop0211ok, pop1218ok, along=4)
-dimnames(pop0618) <- list(age = dimnames(pop0618)[[1]],
+dimnames(pop0618) <- list(age = c(dimnames(italy.deaths.reg)$age),
                           sex = dimnames(pop0618)[[2]],
                           region = dimnames(pop0618)[[3]],
                           time = dimnames(pop0618)[[4]])
